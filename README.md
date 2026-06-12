@@ -32,4 +32,4 @@ Este projeto foi desenhado com uma arquitetura **Zero Config**, permitindo execu
 O projeto utiliza um modelo prático para MVPs (*Minimum Viable Products*) em um formato *All-in-One File*. Diferentes telas (Dashboard, Login, Criar Conta) e pequenos componentes UI (Status Bar nativa, Bottom Nav, Gráficos) são separados por funções lógicas puras dentro do mesmo escopo para garantir rápida implantação e fluidez.
 
 ---
-Desenvolvido por **[Seu Nome Aqui]** [Link para o seu LinkedIn] | [Link para o seu Portfólio]
+Desenvolvido por **Isaac Gomes de Moraes** 
