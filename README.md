@@ -40,4 +40,4 @@ Para facilitar a visualização e avaliação do projeto, você pode entrar no a
 O projeto utiliza um modelo prático para MVPs (*Minimum Viable Products*) em um formato *All-in-One File*. Diferentes telas (Dashboard, Login, Criar Conta) e pequenos componentes UI (Status Bar nativa, Bottom Nav, Gráficos) são separados por funções lógicas puras dentro do mesmo escopo para garantir rápida implantação e fluidez.
 
 ---
-Desenvolvido por **[Isaac Gomes de Moraes]**
+Desenvolvido por **Isaac Gomes de Moraes**
