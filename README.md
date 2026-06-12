@@ -1,1 +1,35 @@
-# FinControl
+# FinControl MVP 💰
+
+Um aplicativo web de controle financeiro responsivo e completo, construído no formato Single Page Application (SPA) para simular uma experiência nativa de smartphone diretamente no navegador.
+
+## 🚀 Como Executar
+
+Este projeto foi desenhado com uma arquitetura **Zero Config**, permitindo execução imediata sem a necessidade de um ambiente de desenvolvimento complexo.
+
+1. Faça o clone deste repositório ou baixe o arquivo `.zip`.
+2. Dê um duplo clique no arquivo `index.html` para abri-lo no seu navegador.
+3. Pronto! O app já está rodando perfeitamente.
+
+> **Teste a versão online:** [Coloque o link do seu GitHub Pages aqui]
+
+## ✨ Funcionalidades
+
+- **Autenticação Simulada:** Fluxo visual completo de Login, Criação de Conta e Recuperação de Senha.
+- **Dashboard Financeiro:** Resumo de saldo disponível com controle automático de receitas e despesas.
+- **Controle de Orçamento:** Acompanhamento dinâmico de gastos por categoria (Alimentação, Transporte, Saúde, etc.) através de gráficos em anel (*Ring Charts*).
+- **Gestão de Transações:** Adição de novas movimentações e extrato detalhado diário.
+- **Persistência de Dados:** O estado do usuário, orçamentos e transações são salvos localmente utilizando a API de `localStorage` do navegador. Os dados não se perdem ao atualizar a página.
+
+## 🛠️ Tecnologias Utilizadas
+
+- **[React 18](https://reactjs.org/):** Importado via CDN para componentização e renderização reativa das telas e estados (`useState`, `useEffect`, `useCallback`).
+- **[Babel Standalone](https://babeljs.io/docs/en/babel-standalone):** Para compilação do código JSX e ES6+ em tempo real no navegador.
+- **HTML5 & CSS3:** Estilização componentizada em blocos in-line, sem a necessidade de frameworks adicionais de CSS.
+- **Ícones SVG Nativos:** Renderização otimizada e construída matematicamente via código (`<svg>`), dispensando o uso de bibliotecas pesadas de ícones.
+
+## 📂 Arquitetura
+
+O projeto utiliza um modelo prático para MVPs (*Minimum Viable Products*) em um formato *All-in-One File*. Diferentes telas (Dashboard, Login, Criar Conta) e pequenos componentes UI (Status Bar nativa, Bottom Nav, Gráficos) são separados por funções lógicas puras dentro do mesmo escopo para garantir rápida implantação e fluidez.
+
+---
+Desenvolvido por **[Seu Nome Aqui]** [Link para o seu LinkedIn] | [Link para o seu Portfólio]
