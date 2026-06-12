@@ -12,6 +12,14 @@ Este projeto foi desenhado com uma arquitetura **Zero Config**, permitindo execu
 
 > **Teste a versão online:** (https://isaacgomes260653.github.io/FinControl/)
 
+## 🔐 Credenciais para Teste
+
+Para facilitar a visualização e avaliação do projeto, você pode entrar no aplicativo utilizando a senha padrão de testes:
+
+- **Senha de acesso:** `123456`
+
+*(Nota: Como o app utiliza o armazenamento local do seu navegador, você também pode testar o fluxo criando uma nova conta, se desejar!)*
+
 ## ✨ Funcionalidades
 
 - **Autenticação Simulada:** Fluxo visual completo de Login, Criação de Conta e Recuperação de Senha.
@@ -32,4 +40,4 @@ Este projeto foi desenhado com uma arquitetura **Zero Config**, permitindo execu
 O projeto utiliza um modelo prático para MVPs (*Minimum Viable Products*) em um formato *All-in-One File*. Diferentes telas (Dashboard, Login, Criar Conta) e pequenos componentes UI (Status Bar nativa, Bottom Nav, Gráficos) são separados por funções lógicas puras dentro do mesmo escopo para garantir rápida implantação e fluidez.
 
 ---
-Desenvolvido por **Isaac Gomes de Moraes** 
+Desenvolvido por **[Isaac Gomes de Moraes]**
