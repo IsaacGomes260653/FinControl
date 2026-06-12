@@ -10,7 +10,7 @@ Este projeto foi desenhado com uma arquitetura **Zero Config**, permitindo execu
 2. Dê um duplo clique no arquivo `index.html` para abri-lo no seu navegador.
 3. Pronto! O app já está rodando perfeitamente.
 
-> **Teste a versão online:** [Coloque o link do seu GitHub Pages aqui]
+> **Teste a versão online:** (https://isaacgomes260653.github.io/FinControl/)
 
 ## ✨ Funcionalidades
 
