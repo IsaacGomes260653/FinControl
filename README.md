@@ -41,3 +41,47 @@ O projeto utiliza um modelo prático para MVPs (*Minimum Viable Products*) em um
 
 ---
 Desenvolvido por **Isaac Gomes de Moraes**
+
+---
+
+# FinControl MVP 💰 (English)
+
+A responsive, full-featured personal finance web app built as a Single Page Application (SPA) that simulates a native smartphone experience directly in the browser.
+
+## 🚀 Running it
+
+Built with a **Zero Config** architecture — no build tools or dev environment needed.
+
+1. Clone this repository or download the `.zip`.
+2. Double-click `index.html` to open it in your browser.
+3. Done! The app is already running.
+
+> **Live demo:** https://isaacgomes260653.github.io/FinControl/
+
+## 🔐 Test credentials
+
+- **Password:** `123456`
+
+*(The app uses browser `localStorage`, so you can also test the full flow by creating a new account.)*
+
+## ✨ Features
+
+- **Simulated authentication:** full Login, Sign Up, and Password Recovery flow.
+- **Financial dashboard:** available balance summary with automatic income/expense tracking.
+- **Budget control:** dynamic spending tracked by category (Food, Transport, Health, etc.) via ring charts.
+- **Transaction management:** add new transactions and view a detailed daily statement.
+- **Data persistence:** user state, budgets, and transactions are saved locally via the browser's `localStorage` API — nothing is lost on refresh.
+
+## 🛠️ Tech stack
+
+- **[React 18](https://reactjs.org/)** via CDN for componentization and reactive rendering (`useState`, `useEffect`, `useCallback`).
+- **[Babel Standalone](https://babeljs.io/docs/en/babel-standalone)** to compile JSX/ES6+ in the browser at runtime.
+- **HTML5 & CSS3:** inline component styling, no extra CSS framework needed.
+- **Native SVG icons:** lightweight, code-built icons instead of a heavy icon library.
+
+## 📂 Architecture
+
+A practical **All-in-One File** MVP structure: different screens (Dashboard, Login, Sign Up) and small UI components (native status bar, bottom nav, charts) are split into pure functions within the same scope for fast, fluid delivery.
+
+---
+Built by **Isaac Gomes de Moraes**
