@@ -496,7 +496,7 @@ const Login=({onLogin,onEsqueci,onCriar})=>{
 /* ═══════════════════════════════════════════════════
    SCREEN: DASHBOARD
 ═══════════════════════════════════════════════════ */
-const Dashboard=({trans,go,onAdd})=>{
+const Dashboard=({trans,go,onAdd,budgets})=>{
   const rec=trans.filter(t=>t.type==='receita').reduce((s,t)=>s+t.val,0);
   const desp=trans.filter(t=>t.type==='despesa').reduce((s,t)=>s+t.val,0);
   const saldo=rec-desp;
@@ -548,7 +548,7 @@ const Dashboard=({trans,go,onAdd})=>{
           <div onClick={()=>go('orc')} style={{fontSize:13,color:GD,fontWeight:600,cursor:'pointer'}}>Ver todos</div>
         </div>
         <div style={{display:'flex',gap:10,marginBottom:20,overflowX:'auto',paddingBottom:4}}>
-          {Object.entries(BUDGETS).map(([cat,limit])=>{
+          {Object.entries(budgets).map(([cat,limit])=>{
             const spent=trans.filter(t=>t.type==='despesa'&&t.cat===cat).reduce((s,t)=>s+t.val,0);
             const pct=spent/limit;
             const col=pct>=.9?R:pct>=.6?'#f59e0b':G;
@@ -872,10 +872,10 @@ const Extrato=({trans,go,onAdd,onDelete})=>{
 /* ═══════════════════════════════════════════════════
    SCREEN: ORÇAMENTOS
 ═══════════════════════════════════════════════════ */
-const Orcamentos=({trans,go,onAdd})=>{
+const Orcamentos=({trans,go,onAdd,budgets})=>{
   const [sel,setSel]=useState('Alimentação');
   const cat=sel;
-  const limit=BUDGETS[sel]||0;
+  const limit=budgets[sel]||0;
   const spent=trans.filter(t=>t.type==='despesa'&&t.cat===sel).reduce((s,t)=>s+t.val,0);
   const pct=limit>0?spent/limit:0;
   const col=pct>=.9?R:pct>=.6?'#f59e0b':G;
@@ -900,9 +900,9 @@ const Orcamentos=({trans,go,onAdd})=>{
       <div style={{flex:1,overflowY:'auto',padding:'16px 16px'}}>
         {/* Category selector */}
         <div style={{display:'flex',gap:10,marginBottom:20,overflowX:'auto',paddingBottom:4}}>
-          {Object.entries(BUDGETS).map(([c,lim])=>{
+          {Object.entries(budgets).map(([c,lim])=>{
             const sp=trans.filter(t=>t.type==='despesa'&&t.cat===c).reduce((s,t)=>s+t.val,0);
-            const p=sp/lim;
+            const p=lim>0?sp/lim:0;
             const cc=p>=.9?RD:p>=.6?AD:GD;
             return(
               <div key={c} onClick={()=>setSel(c)}
@@ -992,10 +992,11 @@ const Modal=({title,onClose,children})=>(
 /* ═══════════════════════════════════════════════════
    SCREEN: PERFIL
 ═══════════════════════════════════════════════════ */
-const Perfil=({go,onAdd,onLogout,trans})=>{
+const Perfil=({go,onAdd,onLogout,trans,budgets,onSaveBudgets})=>{
   const user=load('fc_user',{nome:'Prof. Haddad',email:'haddad@fincontrol.com.br'});
   const [modal,setModal]=useState(null); // 'notif'|'carteiras'|'export'|'cats'
   const [notif,setNotif]=useState({orc:true,trans:true,dicas:false});
+  const [draftBudgets,setDraftBudgets]=useState(budgets);
 
   const rec=trans.filter(t=>t.type==='receita').reduce((s,t)=>s+t.val,0);
   const desp=trans.filter(t=>t.type==='despesa').reduce((s,t)=>s+t.val,0);
@@ -1170,9 +1171,9 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
       {modal==='cats'&&(
         <Modal title="Categorias" onClose={()=>setModal(null)}>
           <div style={{fontSize:13,color:T2,marginBottom:14}}>Limites mensais de orçamento:</div>
-          {Object.entries(BUDGETS).map(([cat,lim])=>{
+          {Object.entries(draftBudgets).map(([cat,lim])=>{
             const spent=trans.filter(t=>t.type==='despesa'&&t.cat===cat).reduce((s,t)=>s+t.val,0);
-            const pct=Math.round(spent/lim*100);
+            const pct=lim>0?Math.round(spent/lim*100):0;
             const col=pct>=90?R:pct>=60?'#f59e0b':G;
             const txt=pct>=90?RD:pct>=60?AD:GD;
             return(
@@ -1185,17 +1186,23 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
                     <div style={{height:4,background:col,borderRadius:2,width:`${Math.min(pct,100)}%`,transition:'width .3s'}}/>
                   </div>
                 </div>
-                <div style={{textAlign:'right',flexShrink:0}}>
-                  <div style={{fontSize:13,fontWeight:700,color:txt}}>{pct}%</div>
-                  <div style={{fontSize:10,color:T3}}>{fmt(lim,0)}</div>
+                <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+                  <span style={{fontSize:12,fontWeight:700,color:txt,minWidth:32,textAlign:'right'}}>{pct}%</span>
+                  <div style={{display:'flex',alignItems:'center',gap:2,background:GR,borderRadius:8,padding:'5px 8px'}}>
+                    <span style={{fontSize:11,color:T3}}>R$</span>
+                    <input type="number" min="0" inputMode="numeric" value={lim}
+                      onChange={e=>setDraftBudgets(p=>({...p,[cat]:Math.max(0,Number(e.target.value)||0)}))}
+                      style={{width:52,border:'none',background:'none',outline:'none',
+                        fontSize:12,fontWeight:700,color:T1,fontFamily:'inherit'}}/>
+                  </div>
                 </div>
               </div>
             );
           })}
-          <button onClick={()=>setModal(null)} style={{width:'100%',background:G,color:W,
+          <button onClick={()=>{onSaveBudgets(draftBudgets);setModal(null)}} style={{width:'100%',background:G,color:W,
             border:'none',borderRadius:12,padding:14,fontSize:15,fontWeight:700,
             cursor:'pointer',fontFamily:'inherit',marginTop:18,boxShadow:`0 4px 12px ${G}44`}}>
-            Fechar
+            Salvar limites
           </button>
         </Modal>
       )}
@@ -1209,6 +1216,7 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
 function App(){
   const [screen,setScreen]=useState(()=>load('fc_user',null)?'dash':'login');
   const [trans,setTrans]=useState(()=>load('fc_trans',SEED));
+  const [budgets,setBudgets]=useState(()=>load('fc_budgets',BUDGETS));
   const [nova,setNova]=useState(false);
 
   const go=useCallback(s=>{setNova(false);setScreen(s)},[]);
@@ -1220,9 +1228,10 @@ function App(){
   const onDelete=useCallback(id=>{
     setTrans(prev=>{const u=prev.filter(t=>t.id!==id);save('fc_trans',u);return u});
   },[]);
+  const onSaveBudgets=useCallback(b=>{setBudgets(b);save('fc_budgets',b)},[]);
   const onLogout=()=>{
-    save('fc_user',null);save('fc_trans',SEED);
-    setTrans(SEED);setScreen('login');
+    save('fc_user',null);save('fc_trans',SEED);save('fc_budgets',BUDGETS);
+    setTrans(SEED);setBudgets(BUDGETS);setScreen('login');
   };
 
   if(screen==='login') return <Login
@@ -1232,11 +1241,12 @@ function App(){
   if(screen==='esqueci') return <EsqueciSenha onBack={()=>setScreen('login')}/>;
   if(screen==='criar') return <CriarConta onBack={()=>setScreen('login')} onCreated={()=>setScreen('dash')}/>;
   if(nova) return <Nova onSave={onSave} onBack={()=>setNova(false)}/>;
-  if(screen==='dash') return <Dashboard trans={trans} go={go} onAdd={onAdd}/>;
+  if(screen==='dash') return <Dashboard trans={trans} go={go} onAdd={onAdd} budgets={budgets}/>;
   if(screen==='extrato') return <Extrato trans={trans} go={go} onAdd={onAdd} onDelete={onDelete}/>;
-  if(screen==='orc') return <Orcamentos trans={trans} go={go} onAdd={onAdd}/>;
-  if(screen==='perfil') return <Perfil go={go} onAdd={onAdd} onLogout={onLogout} trans={trans}/>;
-  return <Dashboard trans={trans} go={go} onAdd={onAdd}/>;
+  if(screen==='orc') return <Orcamentos trans={trans} go={go} onAdd={onAdd} budgets={budgets}/>;
+  if(screen==='perfil') return <Perfil go={go} onAdd={onAdd} onLogout={onLogout} trans={trans}
+    budgets={budgets} onSaveBudgets={onSaveBudgets}/>;
+  return <Dashboard trans={trans} go={go} onAdd={onAdd} budgets={budgets}/>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
