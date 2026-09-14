@@ -514,8 +514,9 @@ const Dashboard=({trans,go,onAdd,budgets})=>{
             <div style={{fontSize:13,color:T2}}>Olá, bem-vindo! 👋</div>
             <div style={{fontSize:18,fontWeight:800,color:T1}}>Prof. Haddad</div>
           </div>
-          <div style={{width:42,height:42,borderRadius:'50%',background:G,
-            display:'flex',alignItems:'center',justifyContent:'center',color:W,fontWeight:700,fontSize:14}}>SH</div>
+          <div onClick={()=>go('perfil')} style={{width:42,height:42,borderRadius:'50%',background:G,
+            display:'flex',alignItems:'center',justifyContent:'center',color:W,fontWeight:700,fontSize:14,
+            cursor:'pointer'}}>SH</div>
         </div>
 
         {/* Balance Card */}
@@ -554,7 +555,7 @@ const Dashboard=({trans,go,onAdd,budgets})=>{
             const col=pct>=.9?R:pct>=.6?'#f59e0b':G;
             const txt=pct>=.9?RD:pct>=.6?AD:GD;
             return(
-              <div key={cat} onClick={()=>go('orc')} style={{background:W,borderRadius:16,padding:'14px 12px',
+              <div key={cat} onClick={()=>go('orc',cat)} style={{background:W,borderRadius:16,padding:'14px 12px',
                 display:'flex',flexDirection:'column',alignItems:'center',gap:6,minWidth:80,
                 boxShadow:'0 2px 8px rgba(0,0,0,.06)',cursor:'pointer',flexShrink:0}}>
                 <Ring pct={pct} size={52} stroke={5} color={col}>
@@ -755,11 +756,20 @@ const Nova=({onSave,onBack})=>{
 const Extrato=({trans,go,onAdd,onDelete})=>{
   const [filter,setFilter]=useState('todos');
   const [confirmId,setConfirmId]=useState(null);
+  const [showSearch,setShowSearch]=useState(false);
+  const [query,setQuery]=useState('');
+  const [showCatFilter,setShowCatFilter]=useState(false);
+  const [catFilter,setCatFilter]=useState('todas');
 
   const rec=trans.filter(t=>t.type==='receita').reduce((s,t)=>s+t.val,0);
   const desp=trans.filter(t=>t.type==='despesa').reduce((s,t)=>s+t.val,0);
 
-  const list=filter==='todos'?trans:trans.filter(t=>t.type===filter);
+  let list=filter==='todos'?trans:trans.filter(t=>t.type===filter);
+  if(catFilter!=='todas') list=list.filter(t=>t.cat===catFilter);
+  if(query.trim()){
+    const q=query.trim().toLowerCase();
+    list=list.filter(t=>t.desc.toLowerCase().includes(q)||t.cat.toLowerCase().includes(q));
+  }
   const groups={};
   list.forEach(t=>{if(!groups[t.date])groups[t.date]=[];groups[t.date].push(t)});
   const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
@@ -780,14 +790,45 @@ const Extrato=({trans,go,onAdd,onDelete})=>{
             <div style={{fontSize:12,color:T2}}>{trans.length} transações em Maio</div>
           </div>
           <div style={{display:'flex',gap:8}}>
-            {['search','filter'].map(n=>(
-              <div key={n} style={{width:38,height:38,background:GR,borderRadius:'50%',
+            <div onClick={()=>{setShowSearch(s=>!s);setShowCatFilter(false)}}
+              style={{width:38,height:38,background:showSearch?G:GR,borderRadius:'50%',
                 display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
-                <Ic n={n} s={17} c={T2}/>
-              </div>
-            ))}
+              <Ic n="search" s={17} c={showSearch?W:T2}/>
+            </div>
+            <div onClick={()=>{setShowCatFilter(s=>!s);setShowSearch(false)}}
+              style={{width:38,height:38,background:showCatFilter||catFilter!=='todas'?G:GR,borderRadius:'50%',
+                display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
+              <Ic n="filter" s={17} c={showCatFilter||catFilter!=='todas'?W:T2}/>
+            </div>
           </div>
         </div>
+        {showSearch&&(
+          <div style={{padding:'0 16px 14px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,background:GR,borderRadius:12,padding:'11px 14px'}}>
+              <Ic n="search" s={16} c={T3}/>
+              <input autoFocus value={query} onChange={e=>setQuery(e.target.value)}
+                placeholder="Buscar por descrição ou categoria"
+                style={{flex:1,border:'none',background:'none',outline:'none',fontSize:14,color:T1,fontFamily:'inherit'}}/>
+              {query&&<button onClick={()=>setQuery('')} aria-label="Limpar busca"
+                style={{background:'none',border:'none',cursor:'pointer',color:T3,display:'flex',padding:2}}>
+                <Ic n="x" s={14} c={T3}/>
+              </button>}
+            </div>
+          </div>
+        )}
+        {showCatFilter&&(
+          <div style={{display:'flex',gap:8,padding:'0 16px 14px',overflowX:'auto'}}>
+            {['todas',...Object.keys(CAT_COLORS)].map(c=>(
+              <button key={c} onClick={()=>setCatFilter(c)}
+                style={{padding:'7px 14px',borderRadius:20,border:'none',cursor:'pointer',
+                  fontFamily:'inherit',fontSize:12,fontWeight:600,flexShrink:0,
+                  background:catFilter===c?G:W,color:catFilter===c?W:T2,
+                  boxShadow:catFilter===c?`0 2px 8px ${G}44`:'0 1px 4px rgba(0,0,0,.06)'}}>
+                {c==='todas'?'Todas categorias':c}
+              </button>
+            ))}
+          </div>
+        )}
         {/* Summary */}
         <div style={{display:'flex',gap:8,padding:'0 16px 14px'}}>
           {[{l:'Receitas',v:rec,c:GD},{l:'Despesas',v:desp,c:RD},{l:'Saldo',v:rec-desp,c:T1}].map(s=>(
@@ -813,6 +854,13 @@ const Extrato=({trans,go,onAdd,onDelete})=>{
         </div>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'4px 16px 16px'}}>
+        {dates.length===0&&(
+          <div style={{textAlign:'center',padding:'48px 16px',color:T3}}>
+            <Ic n="search" s={28} c={T3}/>
+            <div style={{fontSize:14,fontWeight:600,color:T2,marginTop:12}}>Nenhuma transação encontrada</div>
+            <div style={{fontSize:12,marginTop:4}}>Tente ajustar a busca ou o filtro de categoria.</div>
+          </div>
+        )}
         {dates.map(date=>{
           const day=groups[date];
           const dayNet=day.reduce((s,t)=>t.type==='despesa'?s-t.val:s+t.val,0);
@@ -872,8 +920,8 @@ const Extrato=({trans,go,onAdd,onDelete})=>{
 /* ═══════════════════════════════════════════════════
    SCREEN: ORÇAMENTOS
 ═══════════════════════════════════════════════════ */
-const Orcamentos=({trans,go,onAdd,budgets})=>{
-  const [sel,setSel]=useState('Alimentação');
+const Orcamentos=({trans,go,onAdd,budgets,initialCat})=>{
+  const [sel,setSel]=useState(initialCat||'Alimentação');
   const cat=sel;
   const limit=budgets[sel]||0;
   const spent=trans.filter(t=>t.type==='despesa'&&t.cat===sel).reduce((s,t)=>s+t.val,0);
@@ -1217,9 +1265,10 @@ function App(){
   const [screen,setScreen]=useState(()=>load('fc_user',null)?'dash':'login');
   const [trans,setTrans]=useState(()=>load('fc_trans',SEED));
   const [budgets,setBudgets]=useState(()=>load('fc_budgets',BUDGETS));
+  const [orcCat,setOrcCat]=useState('Alimentação');
   const [nova,setNova]=useState(false);
 
-  const go=useCallback(s=>{setNova(false);setScreen(s)},[]);
+  const go=useCallback((s,cat)=>{setNova(false);setScreen(s);if(cat)setOrcCat(cat)},[]);
   const onAdd=useCallback(()=>setNova(true),[]);
   const onSave=useCallback(t=>{
     setTrans(prev=>{const u=[t,...prev];save('fc_trans',u);return u});
@@ -1243,7 +1292,7 @@ function App(){
   if(nova) return <Nova onSave={onSave} onBack={()=>setNova(false)}/>;
   if(screen==='dash') return <Dashboard trans={trans} go={go} onAdd={onAdd} budgets={budgets}/>;
   if(screen==='extrato') return <Extrato trans={trans} go={go} onAdd={onAdd} onDelete={onDelete}/>;
-  if(screen==='orc') return <Orcamentos trans={trans} go={go} onAdd={onAdd} budgets={budgets}/>;
+  if(screen==='orc') return <Orcamentos trans={trans} go={go} onAdd={onAdd} budgets={budgets} initialCat={orcCat}/>;
   if(screen==='perfil') return <Perfil go={go} onAdd={onAdd} onLogout={onLogout} trans={trans}
     budgets={budgets} onSaveBudgets={onSaveBudgets}/>;
   return <Dashboard trans={trans} go={go} onAdd={onAdd} budgets={budgets}/>;
