@@ -752,8 +752,9 @@ const Nova=({onSave,onBack})=>{
 /* ═══════════════════════════════════════════════════
    SCREEN: EXTRATO
 ═══════════════════════════════════════════════════ */
-const Extrato=({trans,go,onAdd})=>{
+const Extrato=({trans,go,onAdd,onDelete})=>{
   const [filter,setFilter]=useState('todos');
+  const [confirmId,setConfirmId]=useState(null);
 
   const rec=trans.filter(t=>t.type==='receita').reduce((s,t)=>s+t.val,0);
   const desp=trans.filter(t=>t.type==='despesa').reduce((s,t)=>s+t.val,0);
@@ -832,9 +833,31 @@ const Extrato=({trans,go,onAdd})=>{
                     <div style={{fontSize:14,fontWeight:600,color:T1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.desc}</div>
                     <div style={{fontSize:12,color:T2}}>{t.cat} · {t.pay}</div>
                   </div>
-                  <div style={{fontSize:14,fontWeight:700,color:t.type==='despesa'?RD:GD,flexShrink:0}}>
-                    {t.type==='despesa'?'–':'+'}R${t.val.toLocaleString('pt-BR',{minimumFractionDigits:2})}
-                  </div>
+                  {confirmId===t.id?(
+                    <div style={{display:'flex',gap:6,flexShrink:0}}>
+                      <button onClick={()=>{onDelete(t.id);setConfirmId(null)}}
+                        style={{background:RD,color:W,border:'none',borderRadius:10,
+                          padding:'7px 11px',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                        Excluir
+                      </button>
+                      <button onClick={()=>setConfirmId(null)}
+                        style={{background:GR,color:T2,border:'none',borderRadius:10,
+                          padding:'7px 11px',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                        Cancelar
+                      </button>
+                    </div>
+                  ):(
+                    <>
+                      <div style={{fontSize:14,fontWeight:700,color:t.type==='despesa'?RD:GD,flexShrink:0}}>
+                        {t.type==='despesa'?'–':'+'}R${t.val.toLocaleString('pt-BR',{minimumFractionDigits:2})}
+                      </div>
+                      <button onClick={()=>setConfirmId(t.id)} aria-label="Excluir transação"
+                        style={{background:'none',border:'none',cursor:'pointer',padding:4,
+                          flexShrink:0,display:'flex',color:T3}}>
+                        <Ic n="x" s={16} c={T3} w={2}/>
+                      </button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -1194,7 +1217,13 @@ function App(){
     setTrans(prev=>{const u=[t,...prev];save('fc_trans',u);return u});
     setNova(false);setScreen('extrato');
   },[]);
-  const onLogout=()=>{save('fc_user',null);save('fc_trans',SEED);setScreen('login')};
+  const onDelete=useCallback(id=>{
+    setTrans(prev=>{const u=prev.filter(t=>t.id!==id);save('fc_trans',u);return u});
+  },[]);
+  const onLogout=()=>{
+    save('fc_user',null);save('fc_trans',SEED);
+    setTrans(SEED);setScreen('login');
+  };
 
   if(screen==='login') return <Login
     onLogin={()=>setScreen('dash')}
@@ -1204,7 +1233,7 @@ function App(){
   if(screen==='criar') return <CriarConta onBack={()=>setScreen('login')} onCreated={()=>setScreen('dash')}/>;
   if(nova) return <Nova onSave={onSave} onBack={()=>setNova(false)}/>;
   if(screen==='dash') return <Dashboard trans={trans} go={go} onAdd={onAdd}/>;
-  if(screen==='extrato') return <Extrato trans={trans} go={go} onAdd={onAdd}/>;
+  if(screen==='extrato') return <Extrato trans={trans} go={go} onAdd={onAdd} onDelete={onDelete}/>;
   if(screen==='orc') return <Orcamentos trans={trans} go={go} onAdd={onAdd}/>;
   if(screen==='perfil') return <Perfil go={go} onAdd={onAdd} onLogout={onLogout} trans={trans}/>;
   return <Dashboard trans={trans} go={go} onAdd={onAdd}/>;
