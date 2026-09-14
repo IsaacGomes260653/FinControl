@@ -29,9 +29,13 @@ const {useState,useEffect,useMemo,useCallback,useRef} = React;
 
 /* ── COLORS ── */
 const G='#10b981', GL='#d1fae5', GD='#059669';
-const R='#ef4444', RL='#fee2e2';
+const R='#ef4444', RL='#fee2e2', RD='#dc2626';
+const AD='#b45309';
 const GR='#f9fafb', W='#ffffff', T1='#111827', T2='#6b7280', T3='#9ca3af';
 const BG='#f2f4f3';
+/* GD/RD/AD: WCAG-safe text variants of G/R/amber — validated via the dataviz skill's
+   contrast check. G/R stay for fills, rings, bars and buttons (graphical marks read
+   against a looser threshold); GD/RD/AD are for the same colors used as body text. */
 
 /* ── SEED DATA ── */
 const SEED=[
@@ -47,7 +51,7 @@ const SEED=[
   {id:10,desc:'Academia',cat:'Saúde',type:'despesa',val:99.90,date:'2026-05-02',pay:'Débito'},
 ];
 const BUDGETS={Alimentação:600,Transporte:300,Saúde:400,Lazer:300,Moradia:1400};
-const CAT_COLORS={Alimentação:'#f59e0b',Transporte:'#3b82f6',Saúde:'#ec4899',Lazer:'#8b5cf6',Moradia:'#10b981',Receita:'#10b981',Outros:'#6b7280'};
+const CAT_COLORS={Alimentação:'#f59e0b',Transporte:'#3b82f6',Saúde:'#ec4899',Lazer:'#8b5cf6',Moradia:'#0891b2',Receita:'#10b981',Outros:'#6b7280'};
 
 function load(k,fb){try{const s=localStorage.getItem(k);return s?JSON.parse(s):fb}catch{return fb}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
@@ -288,7 +292,7 @@ const EsqueciSenha=({onBack})=>{
                 placeholder="seu@email.com" onKeyDown={e=>e.key==='Enter'&&handle()}
                 style={{flex:1,border:'none',background:'none',outline:'none',fontSize:15,color:T1,fontFamily:'inherit'}}/>
             </div>
-            {err&&<div style={{color:R,fontSize:12,marginBottom:18}}>{err}</div>}
+            {err&&<div style={{color:RD,fontSize:12,marginBottom:18}}>{err}</div>}
             <button onClick={handle} style={{background:G,color:W,border:'none',borderRadius:14,
               padding:17,fontSize:16,fontWeight:700,cursor:'pointer',fontFamily:'inherit',
               boxShadow:`0 4px 16px ${G}44`}}>
@@ -404,7 +408,7 @@ const CriarConta=({onBack,onCreated})=>{
                 style={{flex:1,border:'none',background:'none',outline:'none',
                   fontSize:15,color:T1,fontFamily:'inherit'}}/>
             </div>
-            {errs[fd.k]&&<div style={{color:R,fontSize:12,marginTop:5}}>{errs[fd.k]}</div>}
+            {errs[fd.k]&&<div style={{color:RD,fontSize:12,marginTop:5}}>{errs[fd.k]}</div>}
           </div>
         ))}
         <button onClick={handle} style={{background:G,color:W,border:'none',borderRadius:14,
@@ -414,9 +418,9 @@ const CriarConta=({onBack,onCreated})=>{
         </button>
         <div style={{textAlign:'center',color:T3,fontSize:12,marginTop:16,lineHeight:1.5}}>
           Ao criar uma conta você concorda com os<br/>
-          <span style={{color:G,fontWeight:600,cursor:'pointer'}}>Termos de Uso</span>
+          <span style={{color:GD,fontWeight:600,cursor:'pointer'}}>Termos de Uso</span>
           {' '}e{' '}
-          <span style={{color:G,fontWeight:600,cursor:'pointer'}}>Política de Privacidade</span>
+          <span style={{color:GD,fontWeight:600,cursor:'pointer'}}>Política de Privacidade</span>
         </div>
       </div>
     </div>
@@ -472,17 +476,17 @@ const Login=({onLogin,onEsqueci,onCriar})=>{
             </div>
           </div>
         ))}
-        {err&&<div style={{background:RL,borderRadius:10,padding:'10px 14px',color:R,fontSize:13,marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
+        {err&&<div style={{background:RL,borderRadius:10,padding:'10px 14px',color:RD,fontSize:13,marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
           <Ic n="alert" s={16} c={R}/>{err}
         </div>}
-        <div onClick={onEsqueci} style={{textAlign:'right',color:G,fontSize:13,fontWeight:600,marginBottom:28,cursor:'pointer'}}>Esqueci minha senha</div>
+        <div onClick={onEsqueci} style={{textAlign:'right',color:GD,fontSize:13,fontWeight:600,marginBottom:28,cursor:'pointer'}}>Esqueci minha senha</div>
         <button onClick={handle} style={{background:G,color:W,border:'none',borderRadius:14,
           padding:17,fontSize:16,fontWeight:700,cursor:'pointer',fontFamily:'inherit',
           boxShadow:`0 4px 16px ${G}44`}}>
           Entrar
         </button>
         <div style={{textAlign:'center',color:T3,fontSize:13,marginTop:20}}>
-          Não tem uma conta? <span onClick={onCriar} style={{color:G,fontWeight:600,cursor:'pointer'}}>Criar conta gratuita</span>
+          Não tem uma conta? <span onClick={onCriar} style={{color:GD,fontWeight:600,cursor:'pointer'}}>Criar conta gratuita</span>
         </div>
       </div>
     </div>
@@ -541,13 +545,14 @@ const Dashboard=({trans,go,onAdd})=>{
         {/* Budget mini rings */}
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
           <div style={{fontSize:15,fontWeight:700,color:T1}}>Orçamentos</div>
-          <div onClick={()=>go('orc')} style={{fontSize:13,color:G,fontWeight:600,cursor:'pointer'}}>Ver todos</div>
+          <div onClick={()=>go('orc')} style={{fontSize:13,color:GD,fontWeight:600,cursor:'pointer'}}>Ver todos</div>
         </div>
         <div style={{display:'flex',gap:10,marginBottom:20,overflowX:'auto',paddingBottom:4}}>
           {Object.entries(BUDGETS).map(([cat,limit])=>{
             const spent=trans.filter(t=>t.type==='despesa'&&t.cat===cat).reduce((s,t)=>s+t.val,0);
             const pct=spent/limit;
             const col=pct>=.9?R:pct>=.6?'#f59e0b':G;
+            const txt=pct>=.9?RD:pct>=.6?AD:GD;
             return(
               <div key={cat} onClick={()=>go('orc')} style={{background:W,borderRadius:16,padding:'14px 12px',
                 display:'flex',flexDirection:'column',alignItems:'center',gap:6,minWidth:80,
@@ -556,7 +561,7 @@ const Dashboard=({trans,go,onAdd})=>{
                   <CatIcon cat={cat} size={22}/>
                 </Ring>
                 <div style={{fontSize:10,fontWeight:600,color:T1,textAlign:'center',lineHeight:1.2}}>{cat}</div>
-                <div style={{fontSize:11,fontWeight:700,color:col}}>{Math.round(pct*100)}%</div>
+                <div style={{fontSize:11,fontWeight:700,color:txt}}>{Math.round(pct*100)}%</div>
               </div>
             );
           })}
@@ -568,7 +573,7 @@ const Dashboard=({trans,go,onAdd})=>{
             <Ic n="chart" s={16} c={T2}/>
             <span style={{fontSize:15,fontWeight:700,color:T1}}>Hoje</span>
           </div>
-          <div onClick={()=>go('extrato')} style={{fontSize:13,color:G,fontWeight:600,cursor:'pointer'}}>
+          <div onClick={()=>go('extrato')} style={{fontSize:13,color:GD,fontWeight:600,cursor:'pointer'}}>
             <Ic n="search" s={16} c={T2}/>
           </div>
         </div>
@@ -584,7 +589,7 @@ const Dashboard=({trans,go,onAdd})=>{
                 <div style={{fontSize:14,fontWeight:600,color:T1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.desc}</div>
                 <div style={{fontSize:12,color:T2}}>{t.cat} · {t.pay}</div>
               </div>
-              <div style={{fontSize:15,fontWeight:700,color:t.type==='despesa'?R:G,flexShrink:0}}>
+              <div style={{fontSize:15,fontWeight:700,color:t.type==='despesa'?RD:GD,flexShrink:0}}>
                 {t.type==='despesa'?'–':'+'}R${t.val.toLocaleString('pt-BR',{minimumFractionDigits:2})}
               </div>
             </div>
@@ -661,7 +666,7 @@ const Nova=({onSave,onBack})=>{
               style={{flex:1,padding:'10px',borderRadius:9,border:'none',cursor:'pointer',
                 fontFamily:'inherit',fontSize:14,fontWeight:700,transition:'all .2s',
                 background:tipo===t?W:'transparent',
-                color:tipo===t?(t==='despesa'?R:G):T3,
+                color:tipo===t?(t==='despesa'?RD:GD):T3,
                 boxShadow:tipo===t?'0 2px 8px rgba(0,0,0,.08)':'none'}}>
               {t==='despesa'?'↓ Despesa':'↑ Receita'}
             </button>
@@ -698,7 +703,7 @@ const Nova=({onSave,onBack})=>{
           <input value={desc} onChange={e=>{setDesc(e.target.value);setErrs(p=>({...p,desc:''}))}}
             placeholder="Ex: Supermercado Extra"
             style={{border:'none',outline:'none',fontSize:15,color:T1,width:'100%',fontFamily:'inherit',background:'none'}}/>
-          {errs.desc&&<div style={{color:R,fontSize:11,marginTop:4}}>{errs.desc}</div>}
+          {errs.desc&&<div style={{color:RD,fontSize:11,marginTop:4}}>{errs.desc}</div>}
         </div>
 
         {/* Category (hide for receita) */}
@@ -784,7 +789,7 @@ const Extrato=({trans,go,onAdd})=>{
         </div>
         {/* Summary */}
         <div style={{display:'flex',gap:8,padding:'0 16px 14px'}}>
-          {[{l:'Receitas',v:rec,c:G},{l:'Despesas',v:desp,c:R},{l:'Saldo',v:rec-desp,c:T1}].map(s=>(
+          {[{l:'Receitas',v:rec,c:GD},{l:'Despesas',v:desp,c:RD},{l:'Saldo',v:rec-desp,c:T1}].map(s=>(
             <div key={s.l} style={{flex:1,background:GR,borderRadius:12,padding:'10px 10px'}}>
               <div style={{fontSize:9,color:T3,fontWeight:600,marginBottom:3}}>{s.l.toUpperCase()}</div>
               <div style={{fontSize:13,fontWeight:800,color:s.c}}>
@@ -814,7 +819,7 @@ const Extrato=({trans,go,onAdd})=>{
             <div key={date}>
               <div style={{display:'flex',justifyContent:'space-between',padding:'12px 4px 6px'}}>
                 <span style={{fontSize:11,fontWeight:700,color:T3,textTransform:'uppercase'}}>{fmtDate(date)}</span>
-                <span style={{fontSize:11,fontWeight:700,color:dayNet>=0?G:R}}>
+                <span style={{fontSize:11,fontWeight:700,color:dayNet>=0?GD:RD}}>
                   {dayNet>=0?'+':''}{dayNet.toLocaleString('pt-BR',{minimumFractionDigits:2})}
                 </span>
               </div>
@@ -827,7 +832,7 @@ const Extrato=({trans,go,onAdd})=>{
                     <div style={{fontSize:14,fontWeight:600,color:T1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.desc}</div>
                     <div style={{fontSize:12,color:T2}}>{t.cat} · {t.pay}</div>
                   </div>
-                  <div style={{fontSize:14,fontWeight:700,color:t.type==='despesa'?R:G,flexShrink:0}}>
+                  <div style={{fontSize:14,fontWeight:700,color:t.type==='despesa'?RD:GD,flexShrink:0}}>
                     {t.type==='despesa'?'–':'+'}R${t.val.toLocaleString('pt-BR',{minimumFractionDigits:2})}
                   </div>
                 </div>
@@ -875,7 +880,7 @@ const Orcamentos=({trans,go,onAdd})=>{
           {Object.entries(BUDGETS).map(([c,lim])=>{
             const sp=trans.filter(t=>t.type==='despesa'&&t.cat===c).reduce((s,t)=>s+t.val,0);
             const p=sp/lim;
-            const cc=p>=.9?R:p>=.6?'#f59e0b':G;
+            const cc=p>=.9?RD:p>=.6?AD:GD;
             return(
               <div key={c} onClick={()=>setSel(c)}
                 style={{background:sel===c?G:W,borderRadius:14,padding:'10px 14px',
@@ -906,13 +911,13 @@ const Orcamentos=({trans,go,onAdd})=>{
             {fmt(spent)} <span style={{fontSize:13,fontWeight:400,color:T2}}>de {fmt(limit)}</span>
           </div>
           <div style={{fontSize:13,color:T2,marginTop:4}}>
-            Disponível: <span style={{color:G,fontWeight:700}}>{fmt(Math.max(limit-spent,0))}</span>
+            Disponível: <span style={{color:GD,fontWeight:700}}>{fmt(Math.max(limit-spent,0))}</span>
           </div>
           {pct>=.9&&(
             <div style={{background:RL,borderRadius:10,padding:'8px 14px',marginTop:12,
               display:'flex',alignItems:'center',gap:6}}>
               <Ic n="alert" s={14} c={R}/>
-              <span style={{fontSize:12,color:R,fontWeight:600}}>Orçamento quase esgotado!</span>
+              <span style={{fontSize:12,color:RD,fontWeight:600}}>Orçamento quase esgotado!</span>
             </div>
           )}
         </div>
@@ -1017,7 +1022,7 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
 
         {/* Stats */}
         <div style={{display:'flex',gap:10,marginBottom:16}}>
-          {[{l:'Receitas',v:fmt(rec,0),c:G},{l:'Despesas',v:fmt(desp,0),c:R},{l:'Transações',v:trans.length,c:T1}].map(s=>(
+          {[{l:'Receitas',v:fmt(rec,0),c:GD},{l:'Despesas',v:fmt(desp,0),c:RD},{l:'Transações',v:trans.length,c:T1}].map(s=>(
             <div key={s.l} style={{flex:1,background:W,borderRadius:14,padding:'12px 10px',
               boxShadow:'0 1px 4px rgba(0,0,0,.05)',textAlign:'center'}}>
               <div style={{fontSize:9,color:T3,fontWeight:700,marginBottom:4}}>{s.l.toUpperCase()}</div>
@@ -1048,7 +1053,7 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
         </div>
 
         <button onClick={onLogout}
-          style={{width:'100%',background:RL,color:R,border:'none',borderRadius:14,
+          style={{width:'100%',background:RL,color:RD,border:'none',borderRadius:14,
             padding:16,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
           Sair da conta
         </button>
@@ -1099,7 +1104,7 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
               <div style={{width:8,height:8,borderRadius:'50%',background:G}}/>
             </div>
           ))}
-          <button style={{width:'100%',background:GR,color:G,border:`1.5px dashed ${G}`,
+          <button style={{width:'100%',background:GR,color:GD,border:`1.5px dashed ${G}`,
             borderRadius:12,padding:13,fontSize:14,fontWeight:600,cursor:'pointer',
             fontFamily:'inherit',marginTop:16}}>+ Adicionar cartão</button>
         </Modal>
@@ -1146,6 +1151,7 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
             const spent=trans.filter(t=>t.type==='despesa'&&t.cat===cat).reduce((s,t)=>s+t.val,0);
             const pct=Math.round(spent/lim*100);
             const col=pct>=90?R:pct>=60?'#f59e0b':G;
+            const txt=pct>=90?RD:pct>=60?AD:GD;
             return(
               <div key={cat} style={{display:'flex',alignItems:'center',gap:12,
                 padding:'12px 0',borderBottom:'1px solid #f9fafb'}}>
@@ -1157,7 +1163,7 @@ const Perfil=({go,onAdd,onLogout,trans})=>{
                   </div>
                 </div>
                 <div style={{textAlign:'right',flexShrink:0}}>
-                  <div style={{fontSize:13,fontWeight:700,color:col}}>{pct}%</div>
+                  <div style={{fontSize:13,fontWeight:700,color:txt}}>{pct}%</div>
                   <div style={{fontSize:10,color:T3}}>{fmt(lim,0)}</div>
                 </div>
               </div>
