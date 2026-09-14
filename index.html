@@ -55,7 +55,15 @@ function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 /* ── HELPERS ── */
 const fmt=(n,d=2)=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const fmtD=(d)=>d?d.split('-').reverse().join('/'):'-';
-const today=()=>new Date().toISOString().slice(0,10);
+/* The app's demo narrative is pinned to a fictional "now" (2026-05-09) — same idea as the
+   9:41 status-bar clock: it matches the seed data below. today()/yesterday() are the single
+   source of truth for that fictional date so every screen (Dashboard "Hoje", Extrato labels,
+   new transactions) stays consistent instead of drifting to the real system clock. */
+const today=()=>'2026-05-09';
+const yesterday=()=>{const d=new Date(today());d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10)};
+/* Deterministic 0..1 pseudo-random from a string seed — used for illustrative chart
+   data so it stays stable across re-renders instead of reshuffling on every state change. */
+const seeded=(seed)=>{let h=0;for(let i=0;i<seed.length;i++)h=(h*31+seed.charCodeAt(i))>>>0;return(h%1000)/1000};
 
 /* ── LOGO ── */
 const FinLogo=({size=84,dark=false})=>(
@@ -488,7 +496,7 @@ const Dashboard=({trans,go,onAdd})=>{
   const rec=trans.filter(t=>t.type==='receita').reduce((s,t)=>s+t.val,0);
   const desp=trans.filter(t=>t.type==='despesa').reduce((s,t)=>s+t.val,0);
   const saldo=rec-desp;
-  const todayStr='2026-05-09';
+  const todayStr=today();
   const todayTrans=trans.filter(t=>t.date===todayStr).slice(0,4);
 
   return(
@@ -751,9 +759,9 @@ const Extrato=({trans,go,onAdd})=>{
   const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
 
   const fmtDate=d=>{
-    if(d==='2026-05-09')return'Hoje · 09/05/2026';
-    if(d==='2026-05-08')return'Ontem · 08/05/2026';
-    return d.split('-').reverse().join('/');
+    if(d===today())return`Hoje · ${fmtD(d)}`;
+    if(d===yesterday())return`Ontem · ${fmtD(d)}`;
+    return fmtD(d);
   };
 
   return(
@@ -844,9 +852,12 @@ const Orcamentos=({trans,go,onAdd})=>{
   const pct=limit>0?spent/limit:0;
   const col=pct>=.9?R:pct>=.6?'#f59e0b':G;
 
-  // Monthly bars (simulated)
+  // Monthly bars — Mai (index 4) is the real total; other months are illustrative,
+  // seeded off the category name so they stay stable across re-renders.
   const months=['Jan','Fev','Mar','Abr','Mai','Jun'];
-  const barData=months.map((m,i)=>({label:m,val:i===4?spent:Math.random()*limit*.9+limit*.1}));
+  const barData=useMemo(()=>months.map((m,i)=>({
+    label:m,val:i===4?spent:Math.max(seeded(sel+m)*limit*.9+limit*.1,0)
+  })),[sel,spent,limit]);
   const [selBar,setSelBar]=useState(4);
 
   return(
@@ -909,8 +920,8 @@ const Orcamentos=({trans,go,onAdd})=>{
         {/* Bar chart */}
         <div style={{background:W,borderRadius:24,padding:'20px 20px 16px',
           boxShadow:'0 2px 12px rgba(0,0,0,.06)'}}>
-          <div style={{fontSize:14,fontWeight:700,color:T1,marginBottom:4}}>Histórico — {sel}</div>
-          <div style={{fontSize:12,color:T2,marginBottom:16}}>Gasto mensal em 2026</div>
+          <div style={{fontSize:14,fontWeight:700,color:T1,marginBottom:4}}>Histórico - {sel}</div>
+          <div style={{fontSize:12,color:T2,marginBottom:16}}>Gasto mensal em 2026 · meses anteriores são ilustrativos</div>
           <BarChart data={barData} selected={selBar} onSelect={setSelBar} color={col}/>
           <div style={{marginTop:12,padding:'12px 0 0',borderTop:'1px solid #f0f0f0',
             display:'flex',justifyContent:'space-between',alignItems:'center'}}>
